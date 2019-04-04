@@ -78,7 +78,7 @@ module.exports = function(ssb, opts) {
       if (opts.ace_theme) editor.setTheme(opts.ace_theme)
       //editor.session.setMode('ace/mode/css')
 
-      editor.session.on('change', Changes(editor, 600, (err, content) => {
+      editor.session.on('change', Changes(editor, 20, (err, content) => {
         set(content)
       }))
 
@@ -99,7 +99,7 @@ module.exports = function(ssb, opts) {
         const scrollTop = editor.session.getScrollTop()
         editor.session.setValue(newContent.text)
         editor.clearSelection()
-        editor.gotoLine(currentPosition.row + 1, currentPosition.column);
+        editor.gotoLine(currentPosition.row + 1, currentPosition.column)
         editor.session.setScrollTop(scrollTop)
       }
 
