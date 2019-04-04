@@ -49,6 +49,7 @@ function factory(config) {
       return {
         type,
         kind: 'subtitles',
+        text: '',
         schema: {
           description: 'An additional subtitle, caption or metadata track for audio or video files',
           type: 'object',
