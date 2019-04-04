@@ -1,6 +1,6 @@
 {
   "name": "tre-texttracks",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "cpation, subtitle and metadata tracks for audio and video",
   "main": "main.js",
   "browser": "index.js",
