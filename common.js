@@ -14,7 +14,7 @@ function importFiles(ssb, files, opts, cb) {
   const file = files[0]
   const fileProps = getFileProps(file)
 
-  if (file.type !== 'text/vtt') return cb(true)
+  if (file.type !== 'text/vtt' && !file.name.endsWith('.vtt')) return cb(true)
   const bl = BufferList()
   pull(
     file.source(),
