@@ -47,7 +47,7 @@ module.exports = function(ssb, opts) {
         return h('track', {
           attributes: {
             'data-key': kv.key,
-            'default': defaultObs,
+            'default': computed(defaultObs, d => d ? '' : null),
             label: c.name || '[no name]',
             kind: c.kind || 'subtitles',
             srclang: c.language || 'en',
