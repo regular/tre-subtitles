@@ -47,18 +47,26 @@ module.exports = function(ssb, opts) {
     function renderTrack() {
       const loaded = Value(false)
       return computed(previewContentObs, c => {
-        let el
         const mode = computed([modeObs, loaded], (mode, loaded) => {
           if (!loaded) return
           return mode
         })
+
+        let el
+        let listening = false
+        let activeCues = []
         const abort = watch(mode, mode =>{
           if (!mode) return
           el.track.mode = mode
+          if (mode == 'disabled') stopListening()
+          else if (mode !== 'disabled') startListening()
         })
+
         el = h('track', {
-          hooks: [el => abort],
-          'ev-load': e => loaded.set(true),
+          hooks: [el => release],
+          'ev-load': e => {
+            loaded.set(true)
+          },
           attributes: {
             'data-key': kv.key,
             'default': computed(defaultObs, d => d ? '' : null),
@@ -69,6 +77,41 @@ module.exports = function(ssb, opts) {
           }
         })
         return el
+
+        function onCueChange(ev) {
+          for(let cue of this.activeCues) {
+            if (!activeCues.includes(cue)) {
+              //console.log('new cue:', cue.text)
+              sendEvent(el, 'cueenter', cue)
+            }
+          }
+          for(let cue of activeCues) {
+            let found = false
+            for(let ac of this.activeCues) {
+              if (ac == cue) found = true
+            }
+            if (!found) {
+              //console.log('cue disappeared:', cue.text)
+              sendEvent(el, 'cueexit', cue)
+            }
+          }
+          activeCues = Array.from(this.activeCues)
+        }
+
+        function release() {
+          abort()
+          stopListening()
+          activeCues = []
+        }
+
+        function startListening() {
+          if (listening) return
+          el.track.addEventListener('cuechange', onCueChange)
+        }
+        function stopListening() {
+          if (!listening) return
+          el.track.removeEventListener('cuechange', onCueChange)
+        }
       })
     }
 
@@ -161,5 +204,22 @@ function debounce(ms, f) {
       f()
     }, ms)
   }
+}
+
+function sendEvent(el, name, ttcue) {
+  const cue = {
+    id: ttcue.id,
+    text: ttcue.text,
+    startTime: ttcue.startTime,
+    endTime: ttcue.endTime,
+    track: ttcue.track
+  }
+  const event = new CustomEvent(name, {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+    detail: cue
+  })
+  return el.dispatchEvent(event)
 }
 
