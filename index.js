@@ -25,9 +25,11 @@ module.exports = function(ssb, opts) {
 
   return function render(kv, ctx) {
     ctx = ctx || {}
-    const defaultObs = ctx.defaultObs || Value(false)
     const content = kv && kv.value && kv.value.content
     if (content.type !== 'texttrack') return
+
+    const defaultObs = ctx.defaultObs || Value(false)
+    const modeObs = ctx.modeObs || Value("showing")
 
     const contentObs = ctx.contentObs || Value({})
 
@@ -43,8 +45,20 @@ module.exports = function(ssb, opts) {
     return renderTrack()
 
     function renderTrack() {
+      const loaded = Value(false)
       return computed(previewContentObs, c => {
-        return h('track', {
+        let el
+        const mode = computed([modeObs, loaded], (mode, loaded) => {
+          if (!loaded) return
+          return mode
+        })
+        const abort = watch(mode, mode =>{
+          if (!mode) return
+          el.track.mode = mode
+        })
+        el = h('track', {
+          hooks: [el => abort],
+          'ev-load': e => loaded.set(true),
           attributes: {
             'data-key': kv.key,
             'default': computed(defaultObs, d => d ? '' : null),
@@ -54,6 +68,7 @@ module.exports = function(ssb, opts) {
             src: dataURI(c.text, MIMETYPE)
           }
         })
+        return el
       })
     }
 
