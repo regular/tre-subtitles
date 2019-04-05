@@ -25,7 +25,7 @@ module.exports = function(ssb, opts) {
 
   return function render(kv, ctx) {
     ctx = ctx || {}
-    const isDefault = ctx.default || false
+    const defaultObs = ctx.defaultObs || Value(false)
     const content = kv && kv.value && kv.value.content
     if (content.type !== 'texttrack') return
 
@@ -47,7 +47,7 @@ module.exports = function(ssb, opts) {
         return h('track', {
           attributes: {
             'data-key': kv.key,
-            'default': isDefault,
+            'default': defaultObs,
             label: c.name || '[no name]',
             kind: c.kind || 'subtitles',
             srclang: c.language || 'en',
